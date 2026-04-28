@@ -1,1 +1,1230 @@
-hi
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Birox Store — Premium Digital Tools</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    /* ─── Reset & Base ─────────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --purple:  #7C3AED;
+      --blue:    #2563EB;
+      --pink:    #EC4899;
+      --orange:  #F59E0B;
+      --cyan:    #06B6D4;
+      --grad1: linear-gradient(135deg, #7C3AED, #2563EB, #EC4899);
+      --grad2: linear-gradient(135deg, #2563EB, #06B6D4, #7C3AED);
+      --grad3: linear-gradient(135deg, #EC4899, #F59E0B);
+      --grad4: linear-gradient(135deg, #7C3AED, #EC4899, #F59E0B);
+      --bg:     #0a0a12;
+      --bg2:    #0f0f1e;
+      --glass:  rgba(255,255,255,0.05);
+      --glass-border: rgba(255,255,255,0.12);
+      --text:   #f0f0ff;
+      --muted:  rgba(240,240,255,0.55);
+      --radius: 20px;
+      --shadow-glow: 0 0 40px rgba(124,58,237,0.35), 0 8px 32px rgba(0,0,0,0.5);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    /* Noise texture overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      background-size: 200px 200px;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.4;
+    }
+
+    /* Ambient glow blobs */
+    .blob {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+      z-index: 0;
+      animation: blobDrift 18s ease-in-out infinite alternate;
+    }
+    .blob-1 { width: 700px; height: 700px; background: radial-gradient(circle, rgba(124,58,237,0.18), transparent 70%); top: -200px; left: -200px; }
+    .blob-2 { width: 600px; height: 600px; background: radial-gradient(circle, rgba(236,72,153,0.14), transparent 70%); top: 40%; right: -150px; animation-delay: -6s; }
+    .blob-3 { width: 500px; height: 500px; background: radial-gradient(circle, rgba(37,99,235,0.15), transparent 70%); bottom: -100px; left: 30%; animation-delay: -12s; }
+
+    @keyframes blobDrift {
+      0%   { transform: translate(0,0) scale(1); }
+      100% { transform: translate(40px, 60px) scale(1.08); }
+    }
+
+    /* ─── Utility ──────────────────────────────────────────────────────────── */
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+
+    .grad-text {
+      background: var(--grad4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .glass-card {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: var(--radius);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 28px;
+      border-radius: 50px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      text-decoration: none;
+      transition: transform 0.2s, box-shadow 0.2s, filter 0.2s;
+    }
+    .btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
+
+    .btn-primary {
+      background: var(--grad1);
+      color: #fff;
+      box-shadow: 0 4px 24px rgba(124,58,237,0.45);
+    }
+    .btn-primary:hover { box-shadow: 0 8px 36px rgba(124,58,237,0.65); }
+
+    .btn-outline {
+      background: var(--glass);
+      color: var(--text);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(10px);
+    }
+    .btn-outline:hover { border-color: rgba(124,58,237,0.6); box-shadow: 0 0 20px rgba(124,58,237,0.25); }
+
+    /* Fade-in on scroll */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(32px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+    /* ─── Navbar ───────────────────────────────────────────────────────────── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      background: rgba(10,10,18,0.72);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-bottom: 1px solid var(--glass-border);
+    }
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 68px;
+    }
+    .nav-logo {
+      font-size: 22px;
+      font-weight: 800;
+      text-decoration: none;
+      background: var(--grad4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.5px;
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      list-style: none;
+    }
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-cta { display: flex; gap: 12px; align-items: center; }
+
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      padding: 4px;
+    }
+    .hamburger span { width: 24px; height: 2px; background: var(--text); border-radius: 2px; transition: 0.3s; }
+
+    /* ─── Hero ─────────────────────────────────────────────────────────────── */
+    .hero {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      gap: 48px;
+      padding-top: 100px;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(124,58,237,0.15);
+      border: 1px solid rgba(124,58,237,0.3);
+      border-radius: 50px;
+      padding: 6px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #a78bfa;
+      margin-bottom: 24px;
+      animation: pulse-badge 3s ease-in-out infinite;
+    }
+    @keyframes pulse-badge {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(124,58,237,0.3); }
+      50%       { box-shadow: 0 0 0 8px rgba(124,58,237,0); }
+    }
+
+    .hero h1 {
+      font-size: clamp(40px, 5.5vw, 72px);
+      font-weight: 900;
+      line-height: 1.08;
+      letter-spacing: -2px;
+      margin-bottom: 24px;
+    }
+
+    .hero-sub {
+      font-size: 18px;
+      color: var(--muted);
+      max-width: 460px;
+      margin-bottom: 40px;
+      line-height: 1.7;
+    }
+
+    .hero-btns { display: flex; gap: 16px; flex-wrap: wrap; }
+
+    .hero-stats {
+      display: flex;
+      gap: 36px;
+      margin-top: 56px;
+    }
+    .stat-item { text-align: left; }
+    .stat-num {
+      font-size: 28px;
+      font-weight: 800;
+      background: var(--grad1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .stat-label { font-size: 13px; color: var(--muted); margin-top: 2px; }
+
+    /* Floating UI cards */
+    .hero-visual {
+      position: relative;
+      height: 540px;
+    }
+
+    .float-card {
+      position: absolute;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 18px;
+      padding: 16px 20px;
+      border: 1px solid var(--glass-border);
+      animation: floatAnim 6s ease-in-out infinite;
+    }
+
+    .float-card-1 {
+      background: rgba(124,58,237,0.18);
+      top: 40px; right: 20px;
+      width: 200px;
+      animation-delay: 0s;
+    }
+    .float-card-2 {
+      background: rgba(37,99,235,0.18);
+      top: 160px; left: 10px;
+      width: 220px;
+      animation-delay: -2s;
+    }
+    .float-card-3 {
+      background: rgba(236,72,153,0.15);
+      bottom: 100px; right: 40px;
+      width: 190px;
+      animation-delay: -4s;
+    }
+    .float-card-4 {
+      background: rgba(245,158,11,0.15);
+      bottom: 60px; left: 40px;
+      width: 170px;
+      animation-delay: -1s;
+    }
+
+    @keyframes floatAnim {
+      0%, 100% { transform: translateY(0px); }
+      50%       { transform: translateY(-18px); }
+    }
+
+    .fc-icon {
+      width: 40px; height: 40px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      margin-bottom: 10px;
+    }
+    .fc-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+    .fc-sub   { font-size: 12px; color: var(--muted); }
+    .fc-price {
+      font-size: 18px;
+      font-weight: 800;
+      background: var(--grad4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-top: 6px;
+    }
+
+    /* Decorative ring */
+    .hero-ring {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 420px; height: 420px;
+      border-radius: 50%;
+      border: 1px solid rgba(124,58,237,0.2);
+      animation: ringPulse 4s ease-in-out infinite;
+      pointer-events: none;
+    }
+    .hero-ring::after {
+      content: '';
+      position: absolute;
+      inset: 30px;
+      border-radius: 50%;
+      border: 1px solid rgba(236,72,153,0.15);
+      animation: ringPulse 4s ease-in-out infinite reverse;
+    }
+    @keyframes ringPulse {
+      0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+      50%       { transform: translate(-50%, -50%) scale(1.04); opacity: 1; }
+    }
+
+    /* ─── Section Headings ─────────────────────────────────────────────────── */
+    .section { padding: 100px 0; position: relative; z-index: 1; }
+
+    .section-label {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #a78bfa;
+      margin-bottom: 12px;
+    }
+    .section-title {
+      font-size: clamp(28px, 3.5vw, 44px);
+      font-weight: 800;
+      letter-spacing: -1px;
+      line-height: 1.15;
+      margin-bottom: 16px;
+    }
+    .section-sub {
+      font-size: 17px;
+      color: var(--muted);
+      max-width: 520px;
+      line-height: 1.7;
+    }
+    .section-head { margin-bottom: 60px; }
+    .center { text-align: center; }
+    .section-head.center .section-sub { margin-left: auto; margin-right: auto; }
+
+    /* ─── Products ─────────────────────────────────────────────────────────── */
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 24px;
+    }
+
+    .product-card {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: var(--radius);
+      padding: 28px;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    }
+
+    /* Gradient border glow via pseudo element */
+    .product-card::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: calc(var(--radius) + 1px);
+      background: var(--grad1);
+      z-index: -1;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .product-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 60px rgba(124,58,237,0.35), 0 0 0 1px transparent;
+      border-color: transparent;
+    }
+    .product-card:hover::before { opacity: 1; }
+
+    .product-card::after {
+      content: '';
+      position: absolute;
+      inset: 1px;
+      border-radius: calc(var(--radius) - 1px);
+      background: rgba(15,15,30,0.85);
+      z-index: -1;
+    }
+
+    .product-icon-wrap {
+      width: 64px; height: 64px;
+      border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 30px;
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .product-badge {
+      position: absolute;
+      top: 16px; right: 16px;
+      background: rgba(124,58,237,0.25);
+      border: 1px solid rgba(124,58,237,0.4);
+      border-radius: 50px;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 10px;
+      color: #c4b5fd;
+    }
+    .product-badge.hot { background: rgba(236,72,153,0.2); border-color: rgba(236,72,153,0.4); color: #f9a8d4; }
+    .product-badge.new { background: rgba(6,182,212,0.2); border-color: rgba(6,182,212,0.4); color: #67e8f9; }
+
+    .product-title { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+    .product-desc  { font-size: 13px; color: var(--muted); margin-bottom: 20px; line-height: 1.5; }
+
+    .product-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .product-price {
+      font-size: 22px;
+      font-weight: 800;
+      background: var(--grad4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .product-price small {
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--muted);
+      background: none;
+      -webkit-text-fill-color: var(--muted);
+    }
+
+    .btn-buy {
+      padding: 10px 20px;
+      border-radius: 50px;
+      background: var(--grad1);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .btn-buy:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(124,58,237,0.5); }
+
+    /* ─── Categories ───────────────────────────────────────────────────────── */
+    .categories-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+
+    .cat-card {
+      border-radius: var(--radius);
+      padding: 36px 24px;
+      text-align: center;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .cat-card:hover { transform: translateY(-6px); }
+
+    .cat-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: inherit;
+      filter: blur(0);
+      transition: filter 0.3s;
+    }
+    .cat-card:hover::before { filter: brightness(1.15); }
+
+    .cat-card-1 { background: linear-gradient(135deg, #4f1d96, #7C3AED); box-shadow: 0 8px 32px rgba(124,58,237,0.4); }
+    .cat-card-2 { background: linear-gradient(135deg, #1e3a8a, #2563EB); box-shadow: 0 8px 32px rgba(37,99,235,0.4); }
+    .cat-card-3 { background: linear-gradient(135deg, #9d174d, #EC4899); box-shadow: 0 8px 32px rgba(236,72,153,0.4); }
+    .cat-card-4 { background: linear-gradient(135deg, #92400e, #F59E0B); box-shadow: 0 8px 32px rgba(245,158,11,0.4); }
+
+    .cat-icon {
+      font-size: 44px;
+      margin-bottom: 16px;
+      position: relative;
+      z-index: 1;
+      display: block;
+    }
+    .cat-title {
+      font-size: 17px;
+      font-weight: 700;
+      position: relative;
+      z-index: 1;
+    }
+    .cat-count {
+      font-size: 13px;
+      opacity: 0.7;
+      margin-top: 4px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ─── Why Choose Us ────────────────────────────────────────────────────── */
+    .why-bg {
+      background: linear-gradient(180deg, transparent, rgba(15,15,30,0.7), transparent);
+    }
+
+    .why-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+    }
+
+    .why-card {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: var(--radius);
+      padding: 36px 28px;
+      text-align: center;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .why-card:hover {
+      transform: translateY(-6px);
+      box-shadow: var(--shadow-glow);
+    }
+
+    .why-icon-wrap {
+      width: 72px; height: 72px;
+      border-radius: 20px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 34px;
+      margin: 0 auto 20px;
+      position: relative;
+    }
+    .why-icon-wrap::after {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      border-radius: 22px;
+      background: var(--grad1);
+      z-index: -1;
+      opacity: 0.5;
+      filter: blur(10px);
+    }
+
+    .why-icon-1 { background: linear-gradient(135deg, rgba(245,158,11,0.2), rgba(245,158,11,0.05)); border: 1px solid rgba(245,158,11,0.3); }
+    .why-icon-2 { background: linear-gradient(135deg, rgba(124,58,237,0.2), rgba(124,58,237,0.05)); border: 1px solid rgba(124,58,237,0.3); }
+    .why-icon-3 { background: linear-gradient(135deg, rgba(6,182,212,0.2), rgba(6,182,212,0.05)); border: 1px solid rgba(6,182,212,0.3); }
+    .why-icon-4 { background: linear-gradient(135deg, rgba(236,72,153,0.2), rgba(236,72,153,0.05)); border: 1px solid rgba(236,72,153,0.3); }
+
+    .why-title { font-size: 17px; font-weight: 700; margin-bottom: 10px; }
+    .why-desc  { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+    /* ─── CTA ──────────────────────────────────────────────────────────────── */
+    .cta-section {
+      position: relative;
+      overflow: hidden;
+      border-radius: 28px;
+      margin: 0 24px;
+      padding: 80px 60px;
+      text-align: center;
+      background: linear-gradient(135deg, #3b0764, #4f1d96, #1e1b4b, #1e3a8a);
+    }
+    .cta-section::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E") 0 0 / 200px 200px;
+      opacity: 0.3;
+      pointer-events: none;
+    }
+    .cta-glow {
+      position: absolute;
+      top: -100px; left: 50%;
+      transform: translateX(-50%);
+      width: 600px; height: 400px;
+      background: radial-gradient(ellipse, rgba(236,72,153,0.25), transparent 70%);
+      pointer-events: none;
+    }
+    .cta-section h2 {
+      font-size: clamp(32px, 4vw, 52px);
+      font-weight: 900;
+      letter-spacing: -1px;
+      margin-bottom: 16px;
+      position: relative;
+      z-index: 1;
+    }
+    .cta-section p {
+      font-size: 18px;
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 36px;
+      position: relative;
+      z-index: 1;
+    }
+    .cta-section .btn { position: relative; z-index: 1; }
+
+    /* ─── Testimonials ─────────────────────────────────────────────────────── */
+    .testimonials-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    .testi-card {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: var(--radius);
+      padding: 28px;
+    }
+    .testi-stars { color: #F59E0B; font-size: 16px; margin-bottom: 16px; letter-spacing: 2px; }
+    .testi-text  { font-size: 14px; color: var(--muted); line-height: 1.7; margin-bottom: 20px; font-style: italic; }
+    .testi-author {
+      display: flex; align-items: center; gap: 12px;
+    }
+    .testi-avatar {
+      width: 42px; height: 42px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .av-1 { background: var(--grad1); }
+    .av-2 { background: var(--grad2); }
+    .av-3 { background: var(--grad3); }
+    .testi-name  { font-size: 14px; font-weight: 700; }
+    .testi-role  { font-size: 12px; color: var(--muted); }
+
+    /* ─── Footer ───────────────────────────────────────────────────────────── */
+    footer {
+      background: rgba(5,5,12,0.95);
+      border-top: 1px solid var(--glass-border);
+      padding: 60px 0 32px;
+      position: relative;
+      z-index: 1;
+    }
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 48px;
+      margin-bottom: 48px;
+    }
+    .footer-brand p {
+      font-size: 14px;
+      color: var(--muted);
+      margin-top: 12px;
+      max-width: 260px;
+      line-height: 1.7;
+    }
+    .footer-social {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .social-btn {
+      width: 38px; height: 38px;
+      border-radius: 10px;
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      display: flex; align-items: center; justify-content: center;
+      text-decoration: none;
+      font-size: 16px;
+      transition: background 0.2s, border-color 0.2s, transform 0.2s;
+    }
+    .social-btn:hover { background: rgba(124,58,237,0.2); border-color: rgba(124,58,237,0.4); transform: translateY(-2px); }
+
+    .footer-col h4 { font-size: 14px; font-weight: 700; margin-bottom: 16px; color: var(--text); }
+    .footer-col ul { list-style: none; }
+    .footer-col ul li { margin-bottom: 10px; }
+    .footer-col ul li a {
+      font-size: 14px;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .footer-col ul li a:hover { color: var(--text); }
+
+    .footer-bottom {
+      border-top: 1px solid var(--glass-border);
+      padding-top: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    /* WhatsApp FAB */
+    .whatsapp-fab {
+      position: fixed;
+      bottom: 28px; right: 28px;
+      z-index: 200;
+      width: 58px; height: 58px;
+      background: linear-gradient(135deg, #25D366, #128C7E);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px;
+      box-shadow: 0 4px 24px rgba(37,211,102,0.5);
+      text-decoration: none;
+      transition: transform 0.2s, box-shadow 0.2s;
+      animation: fabPulse 3s ease-in-out infinite;
+    }
+    .whatsapp-fab:hover { transform: scale(1.1); box-shadow: 0 8px 32px rgba(37,211,102,0.7); }
+    @keyframes fabPulse {
+      0%, 100% { box-shadow: 0 4px 24px rgba(37,211,102,0.5); }
+      50%       { box-shadow: 0 4px 40px rgba(37,211,102,0.8); }
+    }
+
+    /* ─── Mobile Nav ───────────────────────────────────────────────────────── */
+    @media (max-width: 900px) {
+      .nav-links { display: none; }
+      .nav-cta .btn-outline { display: none; }
+      .hamburger { display: flex; }
+      .mobile-menu {
+        display: none;
+        position: fixed;
+        top: 68px; left: 0; right: 0;
+        background: rgba(10,10,18,0.97);
+        backdrop-filter: blur(24px);
+        border-bottom: 1px solid var(--glass-border);
+        padding: 24px;
+        z-index: 99;
+        flex-direction: column;
+        gap: 16px;
+      }
+      .mobile-menu.open { display: flex; }
+      .mobile-menu a { color: var(--muted); text-decoration: none; font-size: 16px; font-weight: 500; padding: 8px 0; border-bottom: 1px solid var(--glass-border); }
+      .mobile-menu a:last-child { border-bottom: none; }
+    }
+
+    /* ─── Responsive ───────────────────────────────────────────────────────── */
+    @media (max-width: 1024px) {
+      .categories-grid { grid-template-columns: repeat(2, 1fr); }
+      .why-grid { grid-template-columns: repeat(2, 1fr); }
+      .footer-grid { grid-template-columns: 1fr 1fr; }
+      .testimonials-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 768px) {
+      .hero { grid-template-columns: 1fr; padding-top: 120px; }
+      .hero-visual { display: none; }
+      .hero-stats { gap: 24px; flex-wrap: wrap; }
+      .products-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+      .categories-grid { grid-template-columns: repeat(2, 1fr); }
+      .why-grid { grid-template-columns: 1fr 1fr; }
+      .cta-section { padding: 60px 32px; margin: 0 16px; }
+      .testimonials-grid { grid-template-columns: 1fr; }
+      .footer-grid { grid-template-columns: 1fr; gap: 32px; }
+      .footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
+    }
+    @media (max-width: 480px) {
+      .why-grid { grid-template-columns: 1fr; }
+      .categories-grid { grid-template-columns: 1fr 1fr; }
+      .hero-btns .btn { width: 100%; justify-content: center; }
+    }
+
+    /* ─── Divider ───────────────────────────────────────────────────────────── */
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--glass-border), transparent);
+      margin: 0 24px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient blobs -->
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+
+  <!-- WhatsApp FAB -->
+  <a href="https://wa.me/1234567890" class="whatsapp-fab" target="_blank" rel="noopener" aria-label="Chat on WhatsApp">💬</a>
+
+  <!-- ── Navbar ─────────────────────────────────────────────────── -->
+  <nav>
+    <div class="container nav-inner">
+      <a href="#" class="nav-logo">Birox Store</a>
+      <ul class="nav-links">
+        <li><a href="#products">Products</a></li>
+        <li><a href="#categories">Categories</a></li>
+        <li><a href="#why">Why Us</a></li>
+        <li><a href="#testimonials">Reviews</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+      <div class="nav-cta">
+        <a href="#products" class="btn btn-outline">Browse</a>
+        <a href="#products" class="btn btn-primary">Get Started</a>
+      </div>
+      <div class="hamburger" id="hamburger" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile menu -->
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="#products"    onclick="closeMobile()">Products</a>
+    <a href="#categories"  onclick="closeMobile()">Categories</a>
+    <a href="#why"         onclick="closeMobile()">Why Us</a>
+    <a href="#testimonials"onclick="closeMobile()">Reviews</a>
+    <a href="#contact"     onclick="closeMobile()">Contact</a>
+    <a href="#products" class="btn btn-primary" style="text-align:center;border-radius:50px;" onclick="closeMobile()">Get Started</a>
+  </div>
+
+  <!-- ── Hero ──────────────────────────────────────────────────── -->
+  <section class="section">
+    <div class="container hero">
+      <div class="hero-content">
+        <div class="hero-badge">✦ Premium Digital Marketplace</div>
+        <h1>Unlock <span class="grad-text">Premium<br/>Digital Tools</span></h1>
+        <p class="hero-sub">Everything you need in one place — fast, reliable, and affordable. Top-tier accounts, software, and subscriptions at unbeatable prices.</p>
+        <div class="hero-btns">
+          <a href="#products" class="btn btn-primary">🛍️ Browse Products</a>
+          <a href="#categories" class="btn btn-outline">Get Started →</a>
+        </div>
+        <div class="hero-stats">
+          <div class="stat-item"><div class="stat-num">5K+</div><div class="stat-label">Happy Customers</div></div>
+          <div class="stat-item"><div class="stat-num">200+</div><div class="stat-label">Products Available</div></div>
+          <div class="stat-item"><div class="stat-num">99%</div><div class="stat-label">Satisfaction Rate</div></div>
+        </div>
+      </div>
+
+      <!-- Floating cards visual -->
+      <div class="hero-visual" aria-hidden="true">
+        <div class="hero-ring"></div>
+
+        <div class="float-card float-card-1 glass-card">
+          <div class="fc-icon" style="background:linear-gradient(135deg,rgba(124,58,237,0.3),rgba(37,99,235,0.2));">🎨</div>
+          <div class="fc-title">Adobe Creative</div>
+          <div class="fc-sub">All Apps Bundle</div>
+          <div class="fc-price">$4.99</div>
+        </div>
+
+        <div class="float-card float-card-2 glass-card">
+          <div class="fc-icon" style="background:linear-gradient(135deg,rgba(37,99,235,0.3),rgba(6,182,212,0.2));">▶️</div>
+          <div class="fc-title">Netflix Premium</div>
+          <div class="fc-sub">4K Ultra HD · 4 Screens</div>
+          <div class="fc-price">$2.99</div>
+        </div>
+
+        <div class="float-card float-card-3 glass-card">
+          <div class="fc-icon" style="background:linear-gradient(135deg,rgba(236,72,153,0.3),rgba(245,158,11,0.2));">🔐</div>
+          <div class="fc-title">VPN Premium</div>
+          <div class="fc-sub">Lifetime Access · 100 Devices</div>
+          <div class="fc-price">$7.99</div>
+        </div>
+
+        <div class="float-card float-card-4 glass-card">
+          <div class="fc-icon" style="background:linear-gradient(135deg,rgba(245,158,11,0.3),rgba(236,72,153,0.2));">🤖</div>
+          <div class="fc-title">ChatGPT Plus</div>
+          <div class="fc-sub">GPT-4o · Unlimited</div>
+          <div class="fc-price">$3.49</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ── Products ───────────────────────────────────────────────── -->
+  <section class="section" id="products">
+    <div class="container">
+      <div class="section-head center fade-in">
+        <div class="section-label">Our Products</div>
+        <h2 class="section-title">Top <span class="grad-text">Digital Products</span></h2>
+        <p class="section-sub">Hand-picked premium accounts, subscriptions and software — delivered instantly.</p>
+      </div>
+
+      <div class="products-grid">
+
+        <!-- Card 1 -->
+        <div class="product-card fade-in">
+          <span class="product-badge hot">🔥 Hot</span>
+          <div class="product-icon-wrap" style="background:linear-gradient(135deg,rgba(124,58,237,0.25),rgba(37,99,235,0.1));border:1px solid rgba(124,58,237,0.3);">🎨</div>
+          <div class="product-title">Adobe Creative Cloud</div>
+          <div class="product-desc">Full suite — Photoshop, Premiere, Illustrator & more. 1-year access.</div>
+          <div class="product-footer">
+            <div class="product-price">$4.99 <small>/ mo</small></div>
+            <button class="btn-buy">Buy Now</button>
+          </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="product-card fade-in">
+          <span class="product-badge hot">🔥 Hot</span>
+          <div class="product-icon-wrap" style="background:linear-gradient(135deg,rgba(236,72,153,0.25),rgba(124,58,237,0.1));border:1px solid rgba(236,72,153,0.3);">▶️</div>
+          <div class="product-title">Netflix Premium 4K</div>
+          <div class="product-desc">Ultra HD streaming, 4 simultaneous screens. Private account.</div>
+          <div class="product-footer">
+            <div class="product-price">$2.99 <small>/ mo</small></div>
+            <button class="btn-buy">Buy Now</button>
+          </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="product-card fade-in">
+          <span class="product-badge new">✨ New</span>
+          <div class="product-icon-wrap" style="background:linear-gradient(135deg,rgba(6,182,212,0.25),rgba(37,99,235,0.1));border:1px solid rgba(6,182,212,0.3);">🤖</div>
+          <div class="product-title">ChatGPT Plus</div>
+          <div class="product-desc">GPT-4o unlimited access. Shared or private account available.</div>
+          <div class="product-footer">
+            <div class="product-price">$3.49 <small>/ mo</small></div>
+            <button class="btn-buy">Buy Now</button>
+          </div>
+        </div>
+
+        <!-- Card 4 -->
+        <div class="product-card fade-in">
+          <div class="product-icon-wrap" style="background:linear-gradient(135deg,rgba(245,158,11,0.25),rgba(236,72,153,0.1));border:1px solid rgba(245,158,11,0.3);">🎵</div>
+          <div class="product-title">Spotify Premium</div>
+          <div class="product-desc">Ad-free music, offline listening, high-quality audio. Family plan.</div>
+          <div class="product-footer">
+            <div class="product-price">$1.99 <small>/ mo</small></div>
+            <button class="btn-buy">Buy Now</button>
+          </div>
+        </div>
+
+        <!-- Card 5 -->
+        <div class="product-card fade-in">
+          <span class="product-badge">💎 Pro</span>
+          <div class="product-icon-wrap" style="background:linear-gradient(135deg,rgba(124,58,237,0.25),rgba(236,72,153,0.1));border:1px solid rgba(124,58,237,0.3);">🔐</div>
+          <div class="product-title">VPN Premium Lifetime</div>
+          <div class="product-desc">Unlimited bandwidth, 100+ servers, 10 simultaneous devices.</div>
+          <div class="product-footer">
+            <div class="product-price">$7.99 <small>once</small></div>
+            <button class="btn-buy">Buy Now</button>
+          </div>
+        </div>
+
+        <!-- Card 6 -->
+        <div class="product-card fade-in">
+          <span class="product-badge new">✨ New</span>
+          <div class="product-icon-wrap" style="background:linear-gradient(135deg,rgba(37,99,235,0.25),rgba(6,182,212,0.1));border:1px solid rgba(37,99,235,0.3);">📧</div>
+          <div class="product-title">Microsoft 365</div>
+          <div class="product-desc">Word, Excel, PowerPoint, Teams & 1TB OneDrive. Business ready.</div>
+          <div class="product-footer">
+            <div class="product-price">$2.49 <small>/ mo</small></div>
+            <button class="btn-buy">Buy Now</button>
+          </div>
+        </div>
+
+        <!-- Card 7 -->
+        <div class="product-card fade-in">
+          <div class="product-icon-wrap" style="background:linear-gradient(135deg,rgba(236,72,153,0.25),rgba(245,158,11,0.1));border:1px solid rgba(236,72,153,0.3);">🎓</div>
+          <div class="product-title">Canva Pro</div>
+          <div class="product-desc">Unlimited designs, premium templates, brand kit & more.</div>
+          <div class="product-footer">
+            <div class="product-price">$1.49 <small>/ mo</small></div>
+            <button class="btn-buy">Buy Now</button>
+          </div>
+        </div>
+
+        <!-- Card 8 -->
+        <div class="product-card fade-in">
+          <span class="product-badge hot">🔥 Hot</span>
+          <div class="product-icon-wrap" style="background:linear-gradient(135deg,rgba(6,182,212,0.25),rgba(124,58,237,0.1));border:1px solid rgba(6,182,212,0.3);">☁️</div>
+          <div class="product-title">Google One 2TB</div>
+          <div class="product-desc">Cloud storage, Google Photos backup, VPN & premium support.</div>
+          <div class="product-footer">
+            <div class="product-price">$1.99 <small>/ mo</small></div>
+            <button class="btn-buy">Buy Now</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ── Categories ─────────────────────────────────────────────── -->
+  <section class="section" id="categories">
+    <div class="container">
+      <div class="section-head center fade-in">
+        <div class="section-label">Browse By Type</div>
+        <h2 class="section-title">Shop by <span class="grad-text">Category</span></h2>
+        <p class="section-sub">Find exactly what you need in our curated digital collections.</p>
+      </div>
+      <div class="categories-grid">
+        <div class="cat-card cat-card-1 fade-in">
+          <span class="cat-icon">👤</span>
+          <div class="cat-title">Accounts</div>
+          <div class="cat-count">48 products</div>
+        </div>
+        <div class="cat-card cat-card-2 fade-in">
+          <span class="cat-icon">🔄</span>
+          <div class="cat-title">Subscriptions</div>
+          <div class="cat-count">65 products</div>
+        </div>
+        <div class="cat-card cat-card-3 fade-in">
+          <span class="cat-icon">💻</span>
+          <div class="cat-title">Software</div>
+          <div class="cat-count">32 products</div>
+        </div>
+        <div class="cat-card cat-card-4 fade-in">
+          <span class="cat-icon">⚙️</span>
+          <div class="cat-title">Services</div>
+          <div class="cat-count">27 products</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ── Why Choose Us ──────────────────────────────────────────── -->
+  <section class="section why-bg" id="why">
+    <div class="container">
+      <div class="section-head center fade-in">
+        <div class="section-label">Why Birox Store</div>
+        <h2 class="section-title">Built for <span class="grad-text">Your Trust</span></h2>
+        <p class="section-sub">We take pride in delivering a seamless, secure, and premium shopping experience.</p>
+      </div>
+      <div class="why-grid">
+        <div class="why-card fade-in">
+          <div class="why-icon-wrap why-icon-1">⚡</div>
+          <div class="why-title">Instant Delivery</div>
+          <div class="why-desc">Receive your product within seconds of payment confirmation — fully automated.</div>
+        </div>
+        <div class="why-card fade-in">
+          <div class="why-icon-wrap why-icon-2">🔒</div>
+          <div class="why-title">Secure Payment</div>
+          <div class="why-desc">All transactions are fully encrypted. We never store your financial data.</div>
+        </div>
+        <div class="why-card fade-in">
+          <div class="why-icon-wrap why-icon-3">💬</div>
+          <div class="why-title">24/7 Support</div>
+          <div class="why-desc">Our support team is always online via WhatsApp to help you any time of day.</div>
+        </div>
+        <div class="why-card fade-in">
+          <div class="why-icon-wrap why-icon-4">💸</div>
+          <div class="why-title">Best Prices</div>
+          <div class="why-desc">We guarantee the most competitive prices. Found it cheaper? We'll match it.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ── Testimonials ───────────────────────────────────────────── -->
+  <section class="section" id="testimonials">
+    <div class="container">
+      <div class="section-head center fade-in">
+        <div class="section-label">Customer Reviews</div>
+        <h2 class="section-title">What Our <span class="grad-text">Customers Say</span></h2>
+      </div>
+      <div class="testimonials-grid">
+        <div class="testi-card fade-in">
+          <div class="testi-stars">★★★★★</div>
+          <p class="testi-text">"Bought Adobe Creative Cloud at a fraction of the price. Delivered in under 30 seconds. Absolutely incredible service!"</p>
+          <div class="testi-author">
+            <div class="testi-avatar av-1">A</div>
+            <div><div class="testi-name">Alex M.</div><div class="testi-role">Graphic Designer</div></div>
+          </div>
+        </div>
+        <div class="testi-card fade-in">
+          <div class="testi-stars">★★★★★</div>
+          <p class="testi-text">"Best place for digital accounts. ChatGPT Plus for $3.49 is unreal. Already recommended to 10 of my colleagues!"</p>
+          <div class="testi-author">
+            <div class="testi-avatar av-2">S</div>
+            <div><div class="testi-name">Sara K.</div><div class="testi-role">Content Creator</div></div>
+          </div>
+        </div>
+        <div class="testi-card fade-in">
+          <div class="testi-stars">★★★★★</div>
+          <p class="testi-text">"Support was super fast via WhatsApp. Got my Netflix account sorted within minutes. Will definitely order again!"</p>
+          <div class="testi-author">
+            <div class="testi-avatar av-3">J</div>
+            <div><div class="testi-name">James O.</div><div class="testi-role">Student</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CTA ────────────────────────────────────────────────────── -->
+  <section class="section" style="padding-top:0;">
+    <div class="cta-section fade-in">
+      <div class="cta-glow"></div>
+      <h2>Ready to <span class="grad-text">Get Started?</span></h2>
+      <p>Join thousands of satisfied customers. Premium products, delivered instantly.</p>
+      <a href="#products" class="btn btn-primary" style="font-size:17px;padding:16px 40px;">🛍️ Shop Now</a>
+    </div>
+  </section>
+
+  <!-- ── Footer ─────────────────────────────────────────────────── -->
+  <footer id="contact">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="#" class="nav-logo" style="font-size:24px;">Birox Store</a>
+          <p>Your trusted source for premium digital accounts, subscriptions, and software at unbeatable prices.</p>
+          <div class="footer-social">
+            <a href="#" class="social-btn" aria-label="Twitter">𝕏</a>
+            <a href="#" class="social-btn" aria-label="Instagram">📸</a>
+            <a href="#" class="social-btn" aria-label="Telegram">✈️</a>
+            <a href="mailto:support@biroxstore.com" class="social-btn" aria-label="Email">✉️</a>
+            <a href="https://wa.me/1234567890" class="social-btn" target="_blank" rel="noopener" aria-label="WhatsApp">💬</a>
+          </div>
+        </div>
+        <div class="footer-col">
+          <h4>Products</h4>
+          <ul>
+            <li><a href="#">Accounts</a></li>
+            <li><a href="#">Subscriptions</a></li>
+            <li><a href="#">Software</a></li>
+            <li><a href="#">Services</a></li>
+            <li><a href="#">Bundles</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Company</h4>
+          <ul>
+            <li><a href="#">About Us</a></li>
+            <li><a href="#">FAQ</a></li>
+            <li><a href="#">Blog</a></li>
+            <li><a href="#">Affiliate Program</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Support</h4>
+          <ul>
+            <li><a href="https://wa.me/1234567890">WhatsApp Chat</a></li>
+            <li><a href="mailto:support@biroxstore.com">Email Support</a></li>
+            <li><a href="#">Terms of Service</a></li>
+            <li><a href="#">Privacy Policy</a></li>
+            <li><a href="#">Refund Policy</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 Birox Store. All rights reserved.</span>
+        <span>Made with 💜 for the digital age</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // ── Mobile menu ────────────────────────────────────────────────────────
+    const hamburger   = document.getElementById('hamburger');
+    const mobileMenu  = document.getElementById('mobileMenu');
+
+    hamburger.addEventListener('click', () => {
+      mobileMenu.classList.toggle('open');
+    });
+
+    function closeMobile() {
+      mobileMenu.classList.remove('open');
+    }
+
+    // Close when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!hamburger.contains(e.target) && !mobileMenu.contains(e.target)) {
+        mobileMenu.classList.remove('open');
+      }
+    });
+
+    // ── Scroll fade-in ─────────────────────────────────────────────────────
+    const fadeEls = document.querySelectorAll('.fade-in');
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          // Stagger children within a grid
+          const siblings = Array.from(entry.target.parentElement.querySelectorAll('.fade-in'));
+          const idx = siblings.indexOf(entry.target);
+          setTimeout(() => {
+            entry.target.classList.add('visible');
+          }, idx * 80);
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+    fadeEls.forEach(el => observer.observe(el));
+
+    // ── Buy Now buttons ────────────────────────────────────────────────────
+    document.querySelectorAll('.btn-buy').forEach(btn => {
+      btn.addEventListener('click', function () {
+        const card  = this.closest('.product-card');
+        const title = card.querySelector('.product-title').textContent;
+        const price = card.querySelector('.product-price').textContent.trim().split('\n')[0];
+        // Redirect to WhatsApp with product info
+        const msg  = encodeURIComponent(`Hi! I'd like to order: ${title} (${price})`);
+        window.open(`https://wa.me/1234567890?text=${msg}`, '_blank', 'noopener');
+      });
+    });
+
+    // ── Smooth nav active state ─────────────────────────────────────────────
+    const sections = document.querySelectorAll('section[id], footer[id]');
+    const navLinks = document.querySelectorAll('.nav-links a');
+
+    const navObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          navLinks.forEach(a => a.style.color = '');
+          const active = document.querySelector(`.nav-links a[href="#${entry.target.id}"]`);
+          if (active) active.style.color = '#c4b5fd';
+        }
+      });
+    }, { threshold: 0.4 });
+
+    sections.forEach(s => navObserver.observe(s));
+  </script>
+</body>
+</html>
